@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -78,7 +79,7 @@ public ModelAndView excuteSelect(ModelAndView mav) throws IOException {
 	}
 	
 	
-	//http://localhost:8090/myapps/w	rite.do
+	//http://localhost:8090/myapps/write.do
 	@RequestMapping(value = "/write.do", method = RequestMethod.GET)
 	public String writeFrom() {
 		return "write";
@@ -104,4 +105,56 @@ public ModelAndView excuteSelect(ModelAndView mav) throws IOException {
 		return "redirect:/write.do";
 	}
 }
+	
+	//http://localhost:8090/myapps/update.do
+	@RequestMapping(value = "/update.do", method = RequestMethod.GET)
+	public String updateForm(@ModelAttribute("dto") AccountDTO dto) {
+		return "update";
+	}
+	
+	@RequestMapping(value = "/update.do", method = RequestMethod.POST)
+	public String updatePro(AccountDTO dto) throws IOException { 
+	URL url = new URL("http://localhost:8090/myapp/account/update");
+	HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	conn.setRequestMethod("PUT");
+	conn.setRequestProperty("Content-Type", "application/json");
+	conn.setDoOutput(true);
+	
+	Gson gson = new Gson();
+	
+	String json = gson.toJson(dto);
+	BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+	bw.write(json);
+	bw.close();
+	
+	int responseCode = conn.getResponseCode();
+	System.out.println(responseCode);
+	
+	if(responseCode == 200)
+		return "redirect:/list.do";
+	else {
+		System.out.println(conn.getResponseMessage());
+		return "redirect:/update.do";
+	}
 }
+	@RequestMapping(value = "/delete.do", method = RequestMethod.GET)
+	public String deletePro(int user_num) throws IOException {
+		URL url = new URL("http://localhost:8090/myapp/account/delete/"+user_num);
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("DELETE");
+		conn.setRequestProperty("Context-Type","application/json");
+		conn.setDoOutput(false);
+		
+		int responseCode = conn.getResponseCode();
+		System.out.println(responseCode);
+		
+		if(responseCode == 200)
+			return "redirect:/list.do";
+		else {
+			System.out.println(conn.getResponseMessage());
+			return null;
+	}
+	}
+	}
+	
+
